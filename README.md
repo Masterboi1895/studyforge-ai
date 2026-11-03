@@ -17,7 +17,7 @@ A Next.js/TypeScript student learning platform. The existing quadratic demo rema
 - Foundation database tables for future notes and chat.
 
 ## Important limitations
-The Supabase project and external keys are NOT set up by these source files. Do not call the account workflow production-ready until the migration is applied and signup/logout/login persistence is verified. Document upload processing, source retrieval, AI teaching, practice generation, adaptive reviews and Forge Architect's code-editing agent remain unimplemented.
+Course materials upload supports TXT/PDF/DOCX/PNG/JPEG (8 MB limit) after a Supabase storage migration is applied. Only TXT extraction and source grounding are implemented; PDF/DOCX/image parsing is pending. Tutor requests are limited to 40 user messages per 24 hours as a basic cost safeguard, not a production-grade atomic rate limiter.\n\nThe Supabase project and external keys are NOT set up by these source files. Do not call the account workflow production-ready until the migration is applied and signup/logout/login persistence is verified. Document upload processing, source retrieval, AI teaching, practice generation, adaptive reviews and Forge Architect's code-editing agent remain unimplemented.
 
 ## Production controls
 Use Vercel's protected settings to enter keys; never paste them into an ordinary chat. Review and merge feature PRs only after passing CI checks.
