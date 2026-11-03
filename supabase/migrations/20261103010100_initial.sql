@@ -25,6 +25,7 @@ create table if not exists public.course_materials (
  filename text not null,
  storage_path text not null,
  mime_type text not null,
+ extracted_text text,
  created_at timestamptz not null default now()
 );
 create table if not exists public.tutor_conversations (
@@ -52,3 +53,11 @@ create policy "Own courses" on public.courses for all to authenticated using ((s
 create policy "Own course materials" on public.course_materials for all to authenticated using ((select auth.uid())=user_id AND EXISTS(select 1 from public.courses c where c.id=course_id and c.user_id=(select auth.uid()))) with check ((select auth.uid())=user_id AND EXISTS(select 1 from public.courses c where c.id=course_id and c.user_id=(select auth.uid())));
 create policy "Own conversations" on public.tutor_conversations for all to authenticated using ((select auth.uid())=user_id) with check ((select auth.uid())=user_id AND (course_id is null OR EXISTS(select 1 from public.courses c where c.id=course_id and c.user_id=(select auth.uid()))));
 create policy "Own messages" on public.tutor_messages for all to authenticated using ((select auth.uid())=user_id AND EXISTS(select 1 from public.tutor_conversations c where c.id=conversation_id and c.user_id=(select auth.uid()))) with check ((select auth.uid())=user_id AND EXISTS(select 1 from public.tutor_conversations c where c.id=conversation_id and c.user_id=(select auth.uid())));
+
+-- Private storage: paths must start with the authenticated user's UUID.
+insert into storage.buckets (id,name,public,file_size_limit,allowed_mime_types)
+values ('course-materials','course-materials',false,8388608,array['text/plain','application/pdf','image/png','image/jpeg','application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+on conflict (id) do nothing;
+create policy "Student uploads own course materials" on storage.objects for insert to authenticated with check (bucket_id='course-materials' and (storage.foldername(name))[1]=(select auth.uid())::text);
+create policy "Student reads own course materials" on storage.objects for select to authenticated using (bucket_id='course-materials' and (storage.foldername(name))[1]=(select auth.uid())::text);
+create policy "Student deletes own course materials" on storage.objects for delete to authenticated using (bucket_id='course-materials' and (storage.foldername(name))[1]=(select auth.uid())::text);
